@@ -8,6 +8,28 @@ fileManager& fileManager::Instance()
 
 void fileManager::addFile(const QString& path)
 {
+    for (int i = 0; i < m_files.size(); ++i)
+    {
+        if (m_files[i].path() == path)
+        {
+            emit statusChanged("Файл уже под наблюдением: " + path);
+            return;
+        }
+    }
+
+    QFileInfo info(path);
+    if (info.exists() && info.isDir())
+    {
+        emit statusChanged("Ошибка: это папка, а не файл: " + path);
+        return;
+    }
+
+    if (info.exists() && !info.isReadable())
+    {
+        emit statusChanged("Ошибка: нет доступа к файлу: " + path);
+        return;
+    }
+
     ViewFile file(path);
     file.update();
 
@@ -37,10 +59,17 @@ void fileManager::removeFile(const QString& path)
             return;
         }
     }
+    emit statusChanged("Файл не найден: " + path);
 }
 
 void fileManager::init()
 {
+    if (m_files.isEmpty())
+    {
+        emit statusChanged("Нет файлов для инициализации");
+        return;
+    }
+
     for( int i = 0; i < m_files.size(); i++)
     {
         m_files[i].update();
@@ -48,6 +77,7 @@ void fileManager::init()
         m_prevExists[i] = m_files[i].exists();
         m_prevSize[i] = m_files[i].size();
     }
+    emit statusChanged("Инициализация завершена. Наблюдается " + QString::number(m_files.size()) + " файлов");
 }
 
 void fileManager::update()
