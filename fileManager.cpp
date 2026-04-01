@@ -69,6 +69,28 @@ void fileManager::removeFile(const QString& path)
     emit statusChanged("file not found: " + path);
 }
 
+void fileManager::listFiles()
+{
+    if (m_files.isEmpty())
+    {
+        emit statusChanged("No files");
+        return;
+    }
+
+    for (int i = 0; i < m_files.size(); ++i)
+    {
+        QString status;
+        if(m_files[i].exists())
+        {
+            status = "exists, size " + QString::number(m_files[i].size());
+        }
+        else
+            status = "missing";
+        emit statusChanged(QString::number(i+1) + ". " + m_files[i].path() + " - " + status);
+    }
+}
+
+
 void fileManager::init()
 {
     if (m_files.isEmpty())
