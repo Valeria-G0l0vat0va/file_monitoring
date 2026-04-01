@@ -2,20 +2,9 @@
 #include <QTextStream>
 #include <thread>
 #include <chrono>
-
+#include <QDir>
 #include "fileManager.h"
-
-class Console : public QObject
-{
-    Q_OBJECT
-public slots:
-    void print(const QString& msg)
-    {
-        QTextStream out(stdout);
-        out << msg << Qt::endl;
-    }
-};
-
+#include "console.h"
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
@@ -23,19 +12,26 @@ int main(int argc, char *argv[])
     QTextStream in(stdin);
     QTextStream out(stdout);
 
+    console console;
+
+    out << "Current directory: " << QDir::currentPath() << Qt::endl;
+
     fileManager& manager = fileManager::Instance();
-    Console console;
 
-    QObject::connect(&manager, &fileManager::statusChanged, &console, &Console::print);
+    QObject::connect(&manager, &fileManager::statusChanged, &console, &console::print);
 
-    out << "Команды:\n";
-    out << "add <путь>    - добавить файл\n";
-    out << "remove <путь> - удалить файл\n";
-    out << "exit          - выход\n";
+    out << "teams:\n";
+    out << "add <path>    - add file\n";
+    out << "remove <path> - remove file\n";
+    out << "list          - show files\n";
+    out << "exit          - exit\n";
+    out.flush();
+
 
     while (true)
     {
         out << "> ";
+        out.flush();
 
         QString line = in.readLine();
 
@@ -52,16 +48,18 @@ int main(int argc, char *argv[])
             QString path = line.mid(7);
             manager.removeFile(path);
         }
+        else if (line == "list")
+        {
+            manager.listFiles();
+        }
         else
         {
-            out << "Неизвестная команда\n";
+            out << "unknown team\n";
         }
 
-        // Проверяем изменения файлов
         manager.update();
 
-        // небольшая пауза
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     return 0;
