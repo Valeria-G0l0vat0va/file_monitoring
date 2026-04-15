@@ -90,12 +90,11 @@ void fileManager::listFiles()
     }
 }
 
-
 void fileManager::init()
 {
     if (m_files.isEmpty())
     {
-        emit statusChanged("Нет файлов для инициализации");
+        emit statusChanged("No file for init");
         return;
     }
 
@@ -106,7 +105,7 @@ void fileManager::init()
         m_prevExists[i] = m_files[i].exists();
         m_prevSize[i] = m_files[i].size();
     }
-    emit statusChanged("Инициализация завершена. Наблюдается " + QString::number(m_files.size()) + " файлов");
+    emit statusChanged("Initialization is completed. Observed " + QString::number(m_files.size()) + " files");
 }
 
 void fileManager::update()
