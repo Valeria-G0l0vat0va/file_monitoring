@@ -9,3 +9,24 @@
 
 <img width="1863" height="1001" alt="Снимок экрана 2026-04-14 141134" src="https://github.com/user-attachments/assets/03c7f2b8-4257-46e7-b335-3ff658a98020" />
 
+Тестирование
+Commands:
+add <path>
+remove <path>
+list
+exit
+add file.txt
+File added: file.txt size: 243
+add m.txt
+File added: m.txt size: 2
+add i.txt
+File added (waiting for appearance): i.txt
+add p.txt
+File added (waiting for appearance): p.txt
+remove p.txt
+file deleted from monitoring: p.txt
+list
+1. file.txt - exists, size 243
+2. m.txt - exists, size 2
+3. i.txt - missing
+exit
