@@ -10,7 +10,9 @@
 <img width="1863" height="1001" alt="Снимок экрана 2026-04-14 141134" src="https://github.com/user-attachments/assets/03c7f2b8-4257-46e7-b335-3ff658a98020" />
 
 Тестирование
+
 Commands:
+
 add <path>
 
 remove <path>
