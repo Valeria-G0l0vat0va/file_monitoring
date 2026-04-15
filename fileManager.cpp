@@ -8,7 +8,38 @@ fileManager& fileManager::Instance()
 
 void fileManager::addFile(const QString& path)
 {
-    ViewFile file(path);
+    QString normalizedPath = path;
+    normalizedPath.replace("\\", "/");
+
+    for (int i = 0; i < m_files.size(); ++i)
+    {
+        if (m_files[i].path() == normalizedPath)
+        {
+            emit statusChanged("The file is already under surveillance: " + normalizedPath);
+            return;
+        }
+    }
+
+    QFileInfo info(normalizedPath);
+    if (!info.exists())
+    {
+        emit statusChanged("file not exists: " + normalizedPath);
+        return;
+    }
+
+    if (info.isDir())
+    {
+        emit statusChanged("Error: This is a folder, not a file: " + normalizedPath);
+        return;
+    }
+
+    if (!info.isReadable())
+    {
+        emit statusChanged("Error: there is no access to the file: " + normalizedPath);
+        return;
+    }
+
+    ViewFile file(normalizedPath);
     file.update();
 
     m_files.push_back(file);
@@ -17,9 +48,7 @@ void fileManager::addFile(const QString& path)
     m_prevSize.push_back(file.size());
 
     if(file.exists())
-        emit statusChanged("Файл существует: " + path + " размер: " + QString::number(file.size()));
-    else
-        emit statusChanged("Файл не существует: " + path);
+        emit statusChanged("file exists: " + normalizedPath + " size: " + QString::number(file.size()));
 
 }
 
@@ -33,14 +62,42 @@ void fileManager::removeFile(const QString& path)
             m_prevExists.remove(i);
             m_prevSize.remove(i);
 
-            emit statusChanged("Файл удален из наблюдения: " + path);
+            emit statusChanged("file deleted from monitoring: " + path);
             return;
         }
+    }
+    emit statusChanged("file not found: " + path);
+}
+
+void fileManager::listFiles()
+{
+    if (m_files.isEmpty())
+    {
+        emit statusChanged("No files");
+        return;
+    }
+
+    for (int i = 0; i < m_files.size(); ++i)
+    {
+        QString status;
+        if(m_files[i].exists())
+        {
+            status = "exists, size " + QString::number(m_files[i].size());
+        }
+        else
+            status = "missing";
+        emit statusChanged(QString::number(i+1) + ". " + m_files[i].path() + " - " + status);
     }
 }
 
 void fileManager::init()
 {
+    if (m_files.isEmpty())
+    {
+        emit statusChanged("No file for init");
+        return;
+    }
+
     for( int i = 0; i < m_files.size(); i++)
     {
         m_files[i].update();
@@ -48,6 +105,7 @@ void fileManager::init()
         m_prevExists[i] = m_files[i].exists();
         m_prevSize[i] = m_files[i].size();
     }
+    emit statusChanged("Initialization is completed. Observed " + QString::number(m_files.size()) + " files");
 }
 
 void fileManager::update()
@@ -62,13 +120,13 @@ void fileManager::update()
         if(exists != m_prevExists[i])
         {
             if(!exists)
-                emit statusChanged("Файл потерян: " + m_files[i].path());
+                emit statusChanged("file is lost: " + m_files[i].path());
             else
-                emit statusChanged("Файл появился: " + m_files[i].path() + " размер: " + QString::number(size));
+                emit statusChanged("file appeared: " + m_files[i].path() + " size " + QString::number(size));
         }
         else if(exists && size != m_prevSize[i])
         {
-            emit statusChanged("Файл изменен: " + m_files[i].path() + " новый размер: " + QString::number(size));
+            emit statusChanged("file changed: " + m_files[i].path() + " new size: " + QString::number(size));
         }
 
         m_prevExists[i] = exists;

@@ -12,7 +12,7 @@ public:
 
     void addFile(const QString& path);
     void removeFile(const QString& path);
-
+    void listFiles();
     void init();
     void update();
 
