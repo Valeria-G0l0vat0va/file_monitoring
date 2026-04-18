@@ -10,7 +10,6 @@
 <img width="1889" height="1062" alt="image" src="https://github.com/user-attachments/assets/0de89411-b795-4155-bfe4-48b72d6110cc" />
 
 Тестирование
-
 Commands:
 
 add <path>
