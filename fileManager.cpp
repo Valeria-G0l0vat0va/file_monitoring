@@ -2,54 +2,46 @@
 
 fileManager& fileManager::Instance()
 {
-    static fileManager s;
+    static file2 s;
     return s;
 }
 
 void fileManager::addFile(const QString& path)
 {
-    QString normalizedPath = path;
-    normalizedPath.replace("\\", "/");
 
     for (int i = 0; i < m_files.size(); ++i)
     {
-        if (m_files[i].path() == normalizedPath)
+        if (m_files[i].path() == path)
         {
-            emit statusChanged("The file is already under surveillance: " + normalizedPath);
+            emit statusChanged("The file is already under surveillance: " + path);
             return;
         }
     }
 
-    QFileInfo info(normalizedPath);
-    if (!info.exists())
+    QFileInfo info(path);
+    if (info.exists() && info.isDir())
     {
-        emit statusChanged("file not exists: " + normalizedPath);
+        emit statusChanged("Error: This is a folder, not a file: " + path);
         return;
     }
 
-    if (info.isDir())
+    if (info.exists() && !info.isReadable())
     {
-        emit statusChanged("Error: This is a folder, not a file: " + normalizedPath);
+        emit statusChanged("Error: there is no access to the file: " + path);
         return;
     }
 
-    if (!info.isReadable())
-    {
-        emit statusChanged("Error: there is no access to the file: " + normalizedPath);
-        return;
-    }
-
-    ViewFile file(normalizedPath);
+    ViewFile file(path);
     file.update();
 
     m_files.push_back(file);
-
     m_prevExists.push_back(file.exists());
     m_prevSize.push_back(file.size());
 
     if(file.exists())
-        emit statusChanged("file exists: " + normalizedPath + " size: " + QString::number(file.size()));
-
+        emit statusChanged("File added: " + path + " size: " + QString::number(file.size()));
+    else
+        emit statusChanged("File added (waiting for appearance): " + path);
 }
 
 void fileManager::removeFile(const QString& path)
