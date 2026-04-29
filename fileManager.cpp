@@ -2,7 +2,7 @@
 
 fileManager& fileManager::Instance()
 {
-    static file2 s;
+    static fileManager s;
     return s;
 }
 
